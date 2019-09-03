@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Movie Details</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body onload="getMovieData()">
+        <span onclick="goBack()" style="cursor: pointer">
+                <i class="fa fa-long-arrow-left" style="font-size:20px"></i>
+                <span style="font-size:20px">Back to results</span> 
+        </span>
+    <div id="main"> </div>
+    
+    <script>
+        function goBack(){
+            window.history.back();
+        }
+        function getMovieData(){
+            let id = location.search.split('?movieId=')[1];
+            let url = `http://www.omdbapi.com/?apikey=4b80c23d&i=${id}&plot=full`
+            fetch(url)
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(function(result) {
+                    if(result.Response === "True"){
+                        document.getElementById("main").innerHTML = ` 
+                        <div class="movieContentWrapper">
+                            <div class="posterContent">
+                                    <img id="poster" class="poster" src="${(result.Poster && result.Poster != 'N/A') ? result.Poster : "img/movie.png"}">
+                            </div>
+                            <div class="contentWrapper">
+                                <h2 id="movieTitle">${result.Title}</h2>
+                                <span id="movieReleaseYear" class="releaseYear"> ( ${result.Year} ) </span>
+                                <div class="movieInfo">
+                                     <span> ${result.Rated} | ${result.Runtime} | ${result.Genre} | ${result.Released}</span>
+                                </div>
+                                <div class="movieDetails">
+                                    <h3>Overview</h3>
+                                    <p>
+                                        ${result.Plot}
+                                    </p>
+                                </div>
+                                <div class="movieDetails">
+                                    <h3>Director</h3>
+                                    <p>
+                                        ${result.Director}
+                                    </p>
+                                </div>
+                                <div class="movieDetails">
+                                    <h3>Writer</h3>
+                                    <p>
+                                        ${result.Writer}
+                                    </p>
+                                </div>
+                                <div class="movieDetails">
+                                    <h3>Cast</h3>
+                                    <p>
+                                        ${result.Actors}
+                                    </p>
+                                </div>
+                
+                            </div>
+                    </div>
+                        `
+                    }
+                    else{
+                        document.getElementById("main").innerHTML = `<span> ${result.Error} </span>`;
+                    }             
+                });
+        }
+    </script>  
+</body>
+</html>

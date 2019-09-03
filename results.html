@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="css/result.css"/>
+</head>
+<body onload="initialize()" >
+    <div id="resultContent">
+        <div class="top">
+                <p id="searchTitle" >Results for</p>
+                <p id="result"></p>
+        </div>   
+        <div class="movies">
+            <div id="movies" class="thumbnails"></div>
+            <div class="buttonHolder">
+                <button id="loadMore" class="loadMore" onclick="loadMovies()" class="hide" >Load More</button>
+            </div>
+        </div>
+    </div>
+<script>
+    var movies = [];
+    var page = 1;
+    var totalResults;
+
+    function initialize(){
+        let name = location.search.split('?q=')[1];
+        document.getElementById("searchTitle").innerText = ` ${document.getElementById("searchTitle").innerText} "${name.split('+').join(' ')}"`;
+        loadMovies();
+    }
+
+    function loadMovies(){
+        let name = location.search.split('?q=')[1];
+        let url = `http://www.omdbapi.com/?apikey=4b80c23d&s=${name}&type=movie&page=${page}`
+        fetch(url)
+            .then(function(res) {
+                    return res.json();
+            })
+            .then(function(result) {
+                    if(result.Response === "True"){
+                        totalResults = result.totalResults;
+                        document.getElementById("result").innerText = `About ${result.totalResults} results found`;
+                        movies = [...movies,...result.Search];
+                        movieList =  result.Search;
+                        let resultContainer = document.getElementById("movies");
+                        movieList.forEach((movie , idx) => {
+                            let movieContainer = document.createElement("div");
+                            let containerAttr = document.createAttribute("onclick");
+                            containerAttr.value = `redirectToMovie('${movie.imdbID}')`
+                            movieContainer.setAttributeNode(containerAttr);
+                            movieContainer.className="box"
+                            let imageHolder = document.createElement("a");
+                            imageHolder.classList.add("image");
+                            imageHolder.classList.add("fit");
+                            let movieImage = document.createElement("img");
+                            movieImage.src = (movie.Poster  && movie.Poster != 'N/A')? movie.Poster : "img/movie.png"
+                            imageHolder.appendChild(movieImage);
+                            movieContainer.appendChild(imageHolder);
+                            let movieDetails = document.createElement("div");
+                            movieDetails.className = "inner";
+                            let movieName = document.createElement("h3");
+                            movieName.innerText = movie.Title;
+                            movieDetails.appendChild(movieName);
+                            let movieYear = document.createElement("p");
+                            movieYear.innerText = movie.Year;
+                            movieDetails.appendChild(movieYear);
+                            movieContainer.appendChild(movieDetails)
+                            resultContainer.appendChild(movieContainer)
+                        });
+                        if(movies.length !== Number(totalResults)){
+                                page++; 
+                                document.getElementById("loadMore").classList.remove('hide')
+                        }
+                        else{
+                            document.getElementById("loadMore").classList.add('hide')
+                        }
+                    }
+                    else{
+                        document.getElementById("result").innerText = `${result.Error}`;
+                    }             
+            });
+    
+    }
+
+    function redirectToMovie(movieId){
+        console.log(movieId)
+        window.location.href = `http://localhost:8097/movie.html?movieId=${movieId}`;
+    }
+   
+</script>
+</body>
+</html>
